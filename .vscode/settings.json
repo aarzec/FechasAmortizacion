@@ -65,6 +65,7 @@
         "thread": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "fstream": "cpp"
     }
 }
