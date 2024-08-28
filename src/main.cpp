@@ -107,9 +107,10 @@ void calcularAmortizacion(double principal, double annualInterestRate, int month
 
         ajustarFecha(day, currentMonth, year, feriados);
         table.add_row({std::to_string(currentMonth), "$" + formatFlotante(monthlyPayment), "$" + formatFlotante(principalPayment), formatFlotante(interest) + "%", "$" + formatFlotante(abs(balance)), std::to_string(day) + "/" + std::to_string(currentMonth) + "/" + std::to_string(year)});
-        currentMonth++;
 
         htmlString += "<tr><td>" + std::to_string(currentMonth) + "</td><td>$" + formatFlotante(monthlyPayment) + "</td><td>$" + formatFlotante(principalPayment) + "</td><td>" + formatFlotante(interest) + "%</td><td>$" + formatFlotante(abs(balance)) + "</td><td>" + std::to_string(day) + "/" + std::to_string(currentMonth) + "/" + std::to_string(year) + "</td></tr>";
+
+        currentMonth++;
     }
 
     table.row(0).format()
