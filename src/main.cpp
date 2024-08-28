@@ -7,6 +7,12 @@ Materia: Estructura de Datos - 2024
 #include <iomanip>
 #include <ctime>
 #include <cmath>
+#include <fstream>
+#include <filesystem>
+#include <sstream>
+#include <string>
+#include <locale>
+
 #include "../lib/tabulate.hpp"
 #include "../lib/StrLib.h"
 #include "../model/Nodo.h"
@@ -87,6 +93,11 @@ void calcularAmortizacion(double principal, double annualInterestRate, int month
     int year = 2024;
 
     tabulate::Table table;
+    std::string htmlString = "<html><head><style>table {border-collapse: collapse;} th, td {border: 1px solid black; padding: 8px; text-align: center;} th {background-color: #f2f2f2;}</style></head><body>";
+    htmlString += "<h1>Calculadora de amortizaci&oacute;n</h1>";
+    htmlString += "<h2>Pr&eacute;stamo: $" + formatFlotante(principal) + "</h2>";
+    htmlString += "<h2>Cuota mensual: $" + formatFlotante(monthlyPayment) + "</h2>";
+    htmlString += "<table><tr><th>Mes</th><th>Monto</th><th>Principal</th><th>Interes</th><th>Deuda</th><th>Fecha</th></tr>";
     table.add_row({"Mes", "Monto", "Principal", "Interes", "Deuda", "Fecha"});
 
     while (currentMonth <= months) {
@@ -97,6 +108,8 @@ void calcularAmortizacion(double principal, double annualInterestRate, int month
         ajustarFecha(day, currentMonth, year, feriados);
         table.add_row({std::to_string(currentMonth), "$" + formatFlotante(monthlyPayment), "$" + formatFlotante(principalPayment), formatFlotante(interest) + "%", "$" + formatFlotante(abs(balance)), std::to_string(day) + "/" + std::to_string(currentMonth) + "/" + std::to_string(year)});
         currentMonth++;
+
+        htmlString += "<tr><td>" + std::to_string(currentMonth) + "</td><td>$" + formatFlotante(monthlyPayment) + "</td><td>$" + formatFlotante(principalPayment) + "</td><td>" + formatFlotante(interest) + "%</td><td>$" + formatFlotante(abs(balance)) + "</td><td>" + std::to_string(day) + "/" + std::to_string(currentMonth) + "/" + std::to_string(year) + "</td></tr>";
     }
 
     table.row(0).format()
@@ -117,7 +130,17 @@ void calcularAmortizacion(double principal, double annualInterestRate, int month
     table.column(5).format()
         .font_color(tabulate::Color::blue);
 
+    htmlString += "</table></body></html>";
     std::cout << table << std::endl;
+
+    std::ofstream file("amortizacion.html");
+    file << htmlString;
+    file.close();
+    // get absolute path
+    std::string htmlAbsPath = std::filesystem::absolute("amortizacion.html");
+    std::string pdfAbsPath = std::filesystem::absolute("amortizacion.pdf");
+    system(("wkhtmltopdf " + htmlAbsPath + " " + pdfAbsPath).c_str());
+    system(("xdg-open " + pdfAbsPath).c_str());
 }
 
 int main() {
