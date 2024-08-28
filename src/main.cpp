@@ -96,6 +96,7 @@ void calcularAmortizacion(double principal, double annualInterestRate, int month
     std::string htmlString = "<html><head><style>table {border-collapse: collapse;} th, td {border: 1px solid black; padding: 8px; text-align: center;} th {background-color: #f2f2f2;}</style></head><body>";
     htmlString += "<h1>Calculadora de amortizaci&oacute;n</h1>";
     htmlString += "<h2>Pr&eacute;stamo: $" + formatFlotante(principal) + "</h2>";
+    htmlString += "<h2>Tasa de inter&eacute;s anual: " + formatFlotante(annualInterestRate * 100) + "%</h2>";
     htmlString += "<h2>Cuota mensual: $" + formatFlotante(monthlyPayment) + "</h2>";
     htmlString += "<table><tr><th>Mes</th><th>Monto</th><th>Principal</th><th>Interes</th><th>Deuda</th><th>Fecha</th></tr>";
     table.add_row({"Mes", "Monto", "Principal", "Interes", "Deuda", "Fecha"});
@@ -157,9 +158,8 @@ int main() {
     int months = ingresarEntero();
     Utilidades::clearConsole();
 
-    std::cout << std::fixed << std::setprecision(2);
-    std::cout << "\nMonto del préstamo: $" << principal << std::endl;
-    std::cout << "Tasa de interés anual: " << annualInterestRate * 100 << "%" << std::endl;
+    std::cout << "\nMonto del préstamo: $" << formatFlotante(principal) << std::endl;
+    std::cout << "Tasa de interés anual: " << formatFlotante(annualInterestRate * 100) << "%" << std::endl;
     std::cout << "Cantidad de meses: " << months << std::endl;
     std::cout << "\nAmortización:\n";
 

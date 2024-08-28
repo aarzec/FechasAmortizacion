@@ -69,7 +69,7 @@ std::string ingresarCadena(bool o) {
         ch = getch();
         // Borrar
         if (ch == 127 || ch == 8) {
-            std::wcout << "\b \b";
+            std::cout << "\b \b";
             if (str.length() > 0) {
                 str = str.substr(0, str.length() - 1);
             }
@@ -83,10 +83,10 @@ std::string ingresarCadena(bool o) {
         if ((ch < 65 || ch > 90) && (ch < 97 || ch > 122)) {
             continue;
         };
-        std::wcout << ch;
+        std::cout << ch;
         str += ch;
     } while (true);
-    std::wcout << std::endl;
+    std::cout << std::endl;
     return str;
 }
 
@@ -97,7 +97,7 @@ std::string ingresarNumero() {
         ch = getch();
         // Borrar
         if (ch == 127 || ch == 8) {
-            std::wcout << "\b \b";
+            std::cout << "\b \b";
             if (str.length() > 0) {
                 str = str.substr(0, str.length() - 1);
             }
@@ -109,10 +109,10 @@ std::string ingresarNumero() {
         if (ch < 48 || ch > 57) {
             continue;
         };
-        std::wcout << ch;
+        std::cout << ch;
         str += ch;
     } while (true);
-    std::wcout << std::endl;
+    std::cout << std::endl;
     return str;
 }
 
@@ -123,7 +123,7 @@ std::string ingresarCedula() {
         ch = getch();
         // Borrar
         if (ch == 127 || ch == 8) {
-            std::wcout << "\b \b";
+            std::cout << "\b \b";
             if (str.length() > 0) {
                 str = str.substr(0, str.length() - 1);
             }
@@ -137,7 +137,7 @@ std::string ingresarCedula() {
         };
         str += ch;
     } while (true);
-    std::wcout << std::endl;
+    std::cout << std::endl;
     return str;
 }
 
@@ -149,7 +149,7 @@ int ingresarEntero() {
         // Borrar
         if (ch == 127 || ch == 8) {
             if (str.length() > 0) {
-                std::wcout << "\b \b";
+                std::cout << "\b \b";
                 str = str.substr(0, str.length() - 1);
             }
             continue;
@@ -160,10 +160,10 @@ int ingresarEntero() {
         if (ch < 48 || ch > 57) {
             continue;
         };
-        std::wcout << ch;
+        std::cout << ch;
         str += ch;
     } while (true);
-    std::wcout << std::endl;
+    std::cout << std::endl;
     try {
         return std::stoi(str);
     } catch (const std::invalid_argument&) {
@@ -180,7 +180,7 @@ float ingresarFlotante() {
         // Borrar
         if (ch == 127 || ch == 8) {
             if (str.length() > 0) {
-                std::wcout << "\b \b";
+                std::cout << "\b \b";
                 if (str[str.length() - 1] == 46) {
                     hasDot = false;
                 }
@@ -195,7 +195,7 @@ float ingresarFlotante() {
         if (ch == 46) {
             if (!hasDot) {
                 hasDot = true;
-                std::wcout << ch;
+                std::cout << ch;
                 str += ch;
             }
             continue;
@@ -203,9 +203,12 @@ float ingresarFlotante() {
         if (ch < 48 || ch > 57) {
             continue;
         };
-        std::wcout << ch;
+        std::cout << ch;
         str += ch;
     } while (true);
-    std::wcout << std::endl;
+    std::cout << std::endl;
+    if (hasDot) {
+        str = str.replace(str.find("."), 1, ",");
+    }
     return std::stof(str);
 }
