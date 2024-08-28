@@ -1,26 +1,46 @@
+/**
+UNIVERSIDAD DE LAS FUERZAS ARMADAS - ESPE
+Autor: Andrés Romero
+Materia: Estructura de Datos - 2024
+*/
 #include <iostream>
 #include <iomanip>
-#include <vector>
 #include <ctime>
 #include <cmath>
+#include "../lib/tabulate.hpp"
+#include "../lib/StrLib.h"
+#include "../model/Nodo.h"
+#include "../model/ListasSimples.h"
+#include "../utils/TermInput.h"
+#include "../utils/Utilidades.h"
 
-struct Feriado {
-    int day;
-    int month;
-    int year;
+class Feriado {
+    public:
+        int day;
+        int month;
+        int year;
+        Feriado(int _day, int _month, int _year) {
+            day = _day;
+            month = _month;
+            year = _year;
+        }
+        Feriado() {}
 };
 
-bool esFeriado(int day, int month, int year, const std::vector<Feriado>& feriados) {
-    for (const auto& holiday : feriados) {
-        if (holiday.day == day && holiday.month == month && holiday.year == year) {
-            return true;
+bool esFeriado(int day, int month, int year, ListaSimple<Feriado>& feriados) {
+    bool esFeriado = false;
+    feriados.recorrer([&](Nodo<Feriado>* nodo) {
+        if (esFeriado) {
+            return;
         }
-    }
-    return false;
+        if (nodo->getDato().day == day && nodo->getDato().month == month && nodo->getDato().year == year) {
+            esFeriado = true;
+        }
+    });
+    return esFeriado;
 }
 
-
-void ajustarFecha(int& day, int& month, int& year, const std::vector<Feriado>& feriados) {
+void ajustarFecha(int& day, int& month, int& year, ListaSimple<Feriado>& feriados) {
     while (esFeriado(day, month, year, feriados)) {
         day++;
         if (day > 31) {
@@ -34,17 +54,40 @@ void ajustarFecha(int& day, int& month, int& year, const std::vector<Feriado>& f
     }
 }
 
-void calcularAmortizacion(double principal, double annualInterestRate, int months, const std::vector<Feriado>& feriados) {
+std::string formatFlotante(double num) {
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2) << num;
+    std::string ws = ss.str();
+    std::size_t posPunto = ws.find(".");
+    std::size_t posComa = ws.find(",");
+    if (posPunto != std::wstring::npos) {
+        ws.replace(posPunto, 1, ",");
+    }
+    if (posComa != std::wstring::npos) {
+        ws.replace(posComa, 1, ".");
+    }
+    return ws;
+}
+
+std::string minWidthStr(std::string str, int width) {
+    int rem = width - str.length();
+    if (rem <= 0) {
+        return str;
+    }
+    return str + std::string(rem, ' ');
+}
+
+void calcularAmortizacion(double principal, double annualInterestRate, int months, ListaSimple<Feriado>& feriados) {
     double monthlyInterestRate = annualInterestRate / 12 / 100;
     double monthlyPayment = principal * monthlyInterestRate / (1 - pow(1 + monthlyInterestRate, -months));
-
-    std::cout << std::fixed << std::setprecision(2);
-    std::cout << "Mes\tMonto\tPrincipal\tInteres\t\tDeuda\tFecha\n";
 
     double balance = principal;
     int currentMonth = 1;
     int day = 1;
     int year = 2024;
+
+    tabulate::Table table;
+    table.add_row({"Mes", "Monto", "Principal", "Interes", "Deuda", "Fecha"});
 
     while (currentMonth <= months) {
         double interest = balance * monthlyInterestRate;
@@ -52,32 +95,62 @@ void calcularAmortizacion(double principal, double annualInterestRate, int month
         balance -= principalPayment;
 
         ajustarFecha(day, currentMonth, year, feriados);
-
-        std::cout << currentMonth << "\t" << monthlyPayment << "\t" << principalPayment << "\t\t" << interest << "\t\t" << balance << "\t"
-            << day << "/" << currentMonth << "/" << year << "\n";
-
+        table.add_row({std::to_string(currentMonth), "$" + formatFlotante(monthlyPayment), "$" + formatFlotante(principalPayment), formatFlotante(interest) + "%", "$" + formatFlotante(abs(balance)), std::to_string(day) + "/" + std::to_string(currentMonth) + "/" + std::to_string(year)});
         currentMonth++;
     }
+
+    table.row(0).format()
+        .font_background_color(tabulate::Color::white)
+        .font_style({tabulate::FontStyle::bold})
+        .font_align(tabulate::FontAlign::center);
+
+    table.column(0).format()
+        .font_color(tabulate::Color::grey);
+    table.column(1).format()
+        .font_color(tabulate::Color::green);
+    table.column(2).format()
+        .font_color(tabulate::Color::yellow);
+    table.column(3).format()
+        .font_color(tabulate::Color::yellow);
+    table.column(4).format()
+        .font_color(tabulate::Color::red);
+    table.column(5).format()
+        .font_color(tabulate::Color::blue);
+
+    std::cout << table << std::endl;
 }
 
 int main() {
-    double principal = 10000;
-    double annualInterestRate = 5.0;
-    int months = 24;
+    std::setlocale(LC_ALL, "");
+    std::locale::global(std::locale(""));
 
-    std::vector<Feriado> feriados = {
-        {1, 1, 2024},
-        {25, 12, 2024},
-        {12, 2, 2024},
-        {13, 2, 2024},
-        {14, 5, 2024},
-        {1, 5, 2024},
-        {24, 5, 2024},
-        {14, 5, 2024},
-        {9, 10, 2024},
-        {10, 8, 2024},
-        {22, 11, 2024},
-    };
+    Utilidades::clearConsole();
+    std::cout << "Ingrese el monto del préstamo: $";
+    double principal = ingresarFlotante();
+    std::cout << "Ingrese la tasa de interés anual (%): ";
+    double annualInterestRate = ingresarFlotante() / 100.f;
+    std::cout << "Ingrese la cantidad de meses: ";
+    int months = ingresarEntero();
+    Utilidades::clearConsole();
+
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "\nMonto del préstamo: $" << principal << std::endl;
+    std::cout << "Tasa de interés anual: " << annualInterestRate * 100 << "%" << std::endl;
+    std::cout << "Cantidad de meses: " << months << std::endl;
+    std::cout << "\nAmortización:\n";
+
+    ListaSimple<Feriado> feriados;
+    feriados.Insertar(Feriado(1, 1, 2024));
+    feriados.Insertar(Feriado(25, 12, 2024));
+    feriados.Insertar(Feriado(12, 2, 2024));
+    feriados.Insertar(Feriado(13, 2, 2024));
+    feriados.Insertar(Feriado(14, 5, 2024));
+    feriados.Insertar(Feriado(1, 5, 2024));
+    feriados.Insertar(Feriado(24, 5, 2024));
+    feriados.Insertar(Feriado(14, 5, 2024));
+    feriados.Insertar(Feriado(9, 10, 2024));
+    feriados.Insertar(Feriado(10, 8, 2024));
+    feriados.Insertar(Feriado(22, 11, 2024));
 
     calcularAmortizacion(principal, annualInterestRate, months, feriados);
 

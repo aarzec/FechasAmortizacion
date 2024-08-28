@@ -1,2 +1,3 @@
 shopt -s globstar
-g++ -Wall -g **/*.cpp -o app.out -lsfml-graphics -lsfml-window -lsfml-system
+allcpps=$(find . -name "*.cpp")
+g++ -Wall -g -o app.out $allcpps
