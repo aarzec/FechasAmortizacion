@@ -46,6 +46,13 @@ bool esFeriado(int day, int month, int year, ListaSimple<Feriado>& feriados) {
     return esFeriado;
 }
 
+bool esFinDeSemana(int day, int month, int year) {
+    std::tm time_in = {0, 0, 0, day, month - 1, year - 1900};
+    std::time_t time_temp = std::mktime(&time_in);
+    const std::tm* time_out = std::localtime(&time_temp);
+    return time_out->tm_wday == 0 || time_out->tm_wday == 6;
+}
+
 std::vector<std::string> split(std::string str, std::string delimiter) {
     std::vector<std::string> parts;
     size_t pos = 0;
@@ -65,7 +72,6 @@ bool esBiciesto(int year) {
 
 bool esDiaValido(int day, int month, int year) {
     if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2024) {
-        std::cout << "Fecha inválida: " << day << "/" << month << "/" << year << " (fuera de rango)" << std::endl;
         return false;
     }
     if ((month == 2 && day > 29 && esBiciesto(year)) || (month == 2 && day > 28 && !esBiciesto(year))) {
@@ -80,7 +86,7 @@ bool esDiaValido(int day, int month, int year) {
 }
 
 void ajustarFecha(int& day, int& month, int& year, ListaSimple<Feriado>& feriados) {
-    while ((esFeriado(day, month, year, feriados) || !esDiaValido(day, month, year))) {
+    while ((esFeriado(day, month, year, feriados) || !esDiaValido(day, month, year)) || esFinDeSemana(day, month, year)) {
         day++;
         if (day > 31) {
             day = 1;
